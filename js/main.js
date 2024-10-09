@@ -8,14 +8,11 @@ class Personagem {
     }
 
     enfrentarDesafio() {
-        console.log(`\nSubindo para o andar ${this.andarAtual}...`);
-        
         const numeroDeEventos = Math.floor(Math.random() * 3) + 2; // No mínimo 2, no máximo 4 eventos
         for (let i = 0; i < numeroDeEventos; i++) {
             const evento = this.sortearEvento();
-            this.executarEvento(evento);
+            this.mostrarEventoNaTela(evento);
         }
-
         this.andarAtual += 1; // Subir para o próximo andar
     }
 
@@ -24,35 +21,37 @@ class Personagem {
         return eventos[Math.floor(Math.random() * eventos.length)];
     }
 
-    executarEvento(evento) {
+    mostrarEventoNaTela(evento) {
+        const modal = document.getElementById("modal");
+        const modalMessage = document.getElementById("modal-message");
+        
+        let mensagem = "";
         switch (evento) {
             case 'ataque_zumbi':
                 const dano = Math.floor(Math.random() * 20); // Dano causado por zumbis
                 this.vida -= dano;
-                console.log(`Você foi atacado por zumbis e perdeu ${dano} de vida.`);
+                mensagem = `Você foi atacado por zumbis e perdeu ${dano} de vida.`;
                 break;
 
             case 'sala_silenciosa':
                 const ganhoRecurso = Math.floor(Math.random() * 10); // Recursos encontrados
                 this.recurso += ganhoRecurso;
-                console.log(`Você encontrou uma sala silenciosa e obteve ${ganhoRecurso} de recurso.`);
+                mensagem = `Você encontrou uma sala silenciosa e obteve ${ganhoRecurso} de recurso.`;
                 break;
 
             case 'arma_melhor':
                 const ganhoForca = Math.floor(Math.random() * 10 + 5); // Aumenta a força
                 this.forca += ganhoForca;
-                console.log(`Você encontrou uma espada melhor! Sua força aumentou em ${ganhoForca}.`);
+                mensagem = `Você encontrou uma espada melhor! Sua força aumentou em ${ganhoForca}.`;
                 break;
 
             case 'nada':
-                console.log("Nada aconteceu, você teve sorte dessa vez.");
+                mensagem = "Nada aconteceu, você teve sorte dessa vez.";
                 break;
         }
-        this.statusAtual();
-    }
 
-    statusAtual() {
-        console.log(`Status atual -> Vida: ${this.vida}, Força: ${this.forca}, Recursos: ${this.recurso}`);
+        modalMessage.innerText = mensagem;
+        modal.style.display = "flex"; // Exibir a janela modal
     }
 
     estaVivo() {
@@ -79,4 +78,13 @@ function start() {
     } else {
         console.log("\nO jogo terminou. Você não sobreviveu.");
     }
+}
+
+// Função para executar a ação escolhida na janela modal
+function executarAcao(acao) {
+    const modal = document.getElementById("modal");
+    modal.style.display = "none"; // Fechar a janela modal
+
+    // Dependendo da ação escolhida, podemos fazer diferentes coisas no jogo.
+    console.log(`Ação escolhida: ${acao}`);
 }
