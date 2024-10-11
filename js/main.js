@@ -3,14 +3,14 @@ class Personagem {
         this.nome = nome;
         this.vida = 100;
         this.forca = 50; 
-        this.recurso = 10; 
+        this.medicamentos = 10; 
         this.andarAtual = 1; 
-        this.totalAndares = 10; // Número de andares para vencer
+        this.totalAndares = 10; 
         this.eventosPendentes = [];
     }
 
     enfrentarDesafio() {
-        const numeroDeEventos = Math.floor(Math.random() * 3) + 2; 
+        const numeroDeEventos = Math.floor(Math.random() * 3) + 2;
         this.eventosPendentes = [];
         for (let i = 0; i < numeroDeEventos; i++) {
             const evento = this.sortearEvento();
@@ -20,13 +20,13 @@ class Personagem {
     }
 
     sortearEvento() {
-        const eventos = ['ataque_zumbi', 'sala_silenciosa', 'arma_melhor', 'nada'];
+        const eventos = ['ataque_zumbi', 'sala_silenciosa', 'arma_melhor', 'perda_medicamentos', 'sala_armadilha'];
         return eventos[Math.floor(Math.random() * eventos.length)];
     }
 
     mostrarProximoEvento() {
         if (this.eventosPendentes.length > 0) {
-            const evento = this.eventosPendentes.shift(); // Remove o primeiro evento da lista
+            const evento = this.eventosPendentes.shift();
             this.mostrarEventoNaTela(evento);
         } else {
             this.andarAtual++;
@@ -46,44 +46,54 @@ class Personagem {
 
         switch (evento) {
             case 'ataque_zumbi':
-                const dano = Math.floor(Math.random() * 20); 
+                const dano = Math.floor(Math.random() * 30) + 10; 
                 this.vida -= dano;
                 mensagem = `Você foi atacado por zumbis e perdeu ${dano} de vida.`;
                 opcao1 = "Atacar os zumbis";
-                opcao2 = "Tentar fugir";
+                opcao2 = "Fugir e perder medicamentos";
                 break;
 
             case 'sala_silenciosa':
-                const ganhoRecurso = Math.floor(Math.random() * 10); 
-                this.recurso += ganhoRecurso;
-                mensagem = `Você encontrou uma sala silenciosa e obteve ${ganhoRecurso} de recurso.`;
-                opcao1 = "Explorar a sala";
+                const ganhoMedicamentos = Math.floor(Math.random() * 5); 
+                this.medicamentos += ganhoMedicamentos;
+                mensagem = `Você encontrou uma sala silenciosa e obteve ${ganhoMedicamentos} de medicamentos, mas há armadilhas no caminho.`;
+                opcao1 = "Explorar e arriscar vida";
                 opcao2 = "Sair imediatamente";
                 break;
 
             case 'arma_melhor':
-                const ganhoForca = Math.floor(Math.random() * 10 + 5); 
+                const ganhoForca = Math.floor(Math.random() * 5) + 3; 
                 this.forca += ganhoForca;
                 mensagem = `Você encontrou uma espada melhor! Sua força aumentou em ${ganhoForca}.`;
                 opcao1 = "Pegar a espada";
                 opcao2 = "Deixar a espada";
                 break;
 
-            case 'nada':
-                mensagem = "Nada aconteceu, você teve sorte dessa vez.";
-                opcao1 = "Continuar subindo";
-                opcao2 = "Descansar um pouco";
+            case 'perda_medicamentos':
+                const perdaMedicamentos = Math.floor(Math.random() * 8) + 2; 
+                this.medicamentos -= perdaMedicamentos;
+                mensagem = `Você se deparou com saqueadores e perdeu ${perdaMedicamentos} de medicamentos.`;
+                opcao1 = "Enfrentá-los";
+                opcao2 = "Fugir e perder ainda mais medicamentos";
+                break;
+
+            case 'sala_armadilha':
+                const danoArmadilha = Math.floor(Math.random() * 15) + 5;
+                this.vida -= danoArmadilha;
+                mensagem = `Você caiu em uma armadilha e perdeu ${danoArmadilha} de vida.`;
+                opcao1 = "Tentar desarmar a armadilha";
+                opcao2 = "Ignorar e continuar";
                 break;
         }
 
         modalMessage.innerText = mensagem;
         botao1.innerText = opcao1;
         botao2.innerText = opcao2;
-        modal.style.display = "flex"; 
+        modal.style.display = "flex";
     }
 
     statusAtual() {
-        console.log(`Status atual -> Vida: ${this.vida}, Força: ${this.forca}, Recursos: ${this.recurso}`);
+        console.log(`Status atual -> Vida: ${this.vida}, Força: ${this.forca}, Medicamentos: ${this.medicamentos}`);
     }
 
     estaVivo() {
@@ -91,7 +101,7 @@ class Personagem {
     }
 
     chegouAoTopo() {
-        return this.andarAtual > this.totalAndares; 
+        return this.andarAtual > this.totalAndares;
     }
 
     verificarProgresso() {
@@ -103,7 +113,7 @@ class Personagem {
             alert("Você venceu o jogo! Chegou ao topo e foi resgatado!");
         } else {
             this.statusAtual();
-            this.enfrentarDesafio(); // Começar o próximo andar
+            this.enfrentarDesafio();
         }
     }
 }
@@ -119,7 +129,7 @@ function start() {
 
 function executarAcao(acao) {
     const modal = document.getElementById("modal");
-    modal.style.display = "none"; 
+    modal.style.display = "none";
 
     console.log(`Ação escolhida: ${acao}`);
 
