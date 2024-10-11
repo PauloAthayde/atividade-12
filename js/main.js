@@ -36,7 +36,7 @@ function explorar() {
     }
 
     // A chance de explorar novamente ou subir de andar
-    let acao = confirm("Deseja explorar a sala novamente ou avançar para o próximo andar?");
+    let acao = confirm("Deseja continuar explorando a sala (OK) ou avançar para o próximo andar (Cancelar)?");
     if (acao) {
         explorar();
     } else {
@@ -49,7 +49,7 @@ function lutar(tipo) {
     let inimigos = tipo === "zumbis" ? "zumbis" : "infectados";
     alert(`Você está sendo atacado por ${inimigos}!`);
 
-    let acao = confirm("Você deseja atacá-los?");
+    let acao = confirm("Você deseja atacá-los? (OK para atacar, Cancelar para fugir)");
 
     if (acao) {
         let chanceDeVencer = Math.random() * forca;
@@ -58,7 +58,11 @@ function lutar(tipo) {
         } else {
             vida -= 20; // dano do inimigo
             alert(`O ${inimigos} te humilha com seus golpes desnecessariamente espetaculares e altamente efetivos! Sua vida agora é ${vida}.`);
-            let continuar = confirm("Deseja continuar a luta ou fugir?");
+            if (vida <= 0) {
+                alert("Você morreu! Fim de jogo.");
+                return; // Termina o jogo
+            }
+            let continuar = confirm("Deseja continuar a luta (OK) ou fugir (Cancelar)?");
             if (continuar) {
                 lutar(tipo);
             } else {
@@ -109,6 +113,10 @@ function salaSilenciosa() {
     if (Math.random() < 0.5) {
         alert("Você foi atacado enquanto usava os medicamentos!");
         vida -= 20; // dano do ataque
+        if (vida <= 0) {
+            alert("Você morreu! Fim de jogo.");
+            return; // Termina o jogo
+        }
     }
 
     mostrarStatus();
