@@ -20,11 +20,15 @@ class Personagem {
 
     // Função para enfrentar um desafio
     enfrentarDesafio() {
-        if (this.explorandoSala) {
-            this.explorandoSala = false;
-            this.gerarEventoAleatorio();
+        if (this.estaVivo() && !this.chegouAoTopo()) {
+            if (this.explorandoSala) {
+                this.explorandoSala = false;
+                this.gerarEventoAleatorio();
+            } else {
+                this.mostrarOpcoes();
+            }
         } else {
-            this.mostrarOpcoes();
+            this.verificarProgresso();
         }
     }
 
@@ -76,6 +80,9 @@ class Personagem {
         // Executa os eventos
         evento1();
         evento2();
+
+        // Chama o próximo desafio após os eventos
+        setTimeout(() => this.enfrentarDesafio(), 1000); // Adiciona um pequeno atraso para o próximo desafio
     }
 
     // Evento: ataque de zumbis
