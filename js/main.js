@@ -1,122 +1,86 @@
 // main.js
-
 let vida = 100;
 let forca = 50;
 let medicamentos = 10;
-let andarAtual = 1;
-let eventosPorAndar = 2; // Número mínimo de eventos por andar
-let tempoExplorando = 0; // Para controlar a dificuldade
-let maxAndares = 10; // Total de andares
-let inimigo; // Para armazenar o tipo de inimigo
+let andar = 1;
 
 function start() {
-  vida = 100;
-  forca = 50;
-  medicamentos = 10;
-  andarAtual = 1;
-  tempoExplorando = 0;
-  eventosPorAndar = 2;
-  alert(`Iniciando o jogo! Você está no andar ${andarAtual}.`);
-  explorarAndar();
-}
+    alert("Bem-vindo ao jogo! Você é um sobrevivente do apocalipse zumbi. Tente chegar ao térreo do prédio onde um helicóptero está esperando para resgatá-lo!");
+    while (vida > 0 && andar <= 10) {
+        mostrarStatus();
+        let acao = prompt("Escolha sua ação:\n1. Explorar a sala\n2. Avançar para o próximo andar");
+        if (acao === "1") {
+            explorarSala();
+        } else if (acao === "2") {
+            avancarAndar();
+        } else {
+            alert("Opção inválida. Tente novamente.");
+        }
+    }
 
-function explorarAndar() {
-  let eventos = gerarEventos();
-  alert(`Você está no andar ${andarAtual}.\nEventos:\n${eventos.join('\n')}`);
-  let acao = prompt("Escolha uma ação:\n1. Explorar a sala\n2. Avançar para o próximo andar");
-  if (acao === "1") {
-    tempoExplorando++;
-    let resultadoExploracao = eventos[Math.floor(Math.random() * eventos.length)];
-    tratarEvento(resultadoExploracao);
-  } else if (acao === "2") {
-    if (andarAtual < maxAndares) {
-      andarAtual++;
-      tempoExplorando = 0; // Resetar tempo ao subir
-      explorarAndar();
+    if (vida <= 0) {
+        alert("Você morreu! Fim de jogo.");
     } else {
-      alert("Você chegou ao térreo! Parabéns, você venceu o jogo!");
+        alert("Parabéns! Você chegou ao térreo e foi resgatado!");
     }
-  } else {
-    alert("Ação inválida! Tente novamente.");
-    explorarAndar();
-  }
 }
 
-function gerarEventos() {
-  let eventos = [];
-  for (let i = 0; i < eventosPorAndar; i++) {
-    let tipoEvento = Math.random();
-    if (tipoEvento < 0.5) {
-      eventos.push("Você encontrou uma sala silenciosa e ganhou 1 medicamento.");
-      if (medicamentos < 10) medicamentos++; // Limitar o número de medicamentos a 10
+function mostrarStatus() {
+    alert(`Status Atual:\nVida: ${vida}\nForça: ${forca}\nMedicamentos: ${medicamentos}\nAndar: ${andar}`);
+}
+
+function explorarSala() {
+    const evento = gerarEvento();
+    alert("Você está explorando a sala...");
+    if (evento === "salaSilenciosa") {
+        alert("Você encontrou uma sala silenciosa. Você pode usar medicamentos aqui.");
+        let usarMedicamento = prompt("Deseja usar um medicamento? (sim/não)");
+        if (usarMedicamento.toLowerCase() === "sim") {
+            usarMedicamento();
+        }
+    } else if (evento === "ataqueZumbis") {
+        alert("Você está sendo atacado por zumbis!");
+        let acaoCombate = prompt("Escolha sua ação:\n1. Atacar os zumbis\n2. Fugir");
+        if (acaoCombate === "1") {
+            let resultado = combaterZumbis();
+            alert(resultado);
+        } else if (acaoCombate === "2") {
+            let perdaMedicamentos = Math.floor(Math.random() * 3) + 1; // Perde entre 1 e 3 medicamentos
+            medicamentos = Math.max(0, medicamentos - perdaMedicamentos);
+            alert(`Você fugiu, mas perdeu ${perdaMedicamentos} medicamentos.`);
+        } else {
+            alert("Opção inválida.");
+        }
+    }
+}
+
+function avancarAndar() {
+    andar++;
+    alert(`Você subiu para o andar ${andar}!`);
+}
+
+function gerarEvento() {
+    const eventos = ["salaSilenciosa", "ataqueZumbis"];
+    return eventos[Math.floor(Math.random() * eventos.length)];
+}
+
+function combaterZumbis() {
+    let chanceDeVencer = Math.random() * forca; // Chance de vencer baseada na força
+    if (chanceDeVencer > 25) { // Valor de referência para vencer
+        return "Você atacou os zumbis e os derrotou sem ferimentos!";
     } else {
-      inimigo = Math.random() < 0.5 ? "zumbis" : "infectados";
-      eventos.push(`Você está sendo atacado por ${inimigo}!`);
+        let danoRecebido = Math.floor(Math.random() * 20) + 5; // Dano entre 5 e 25
+        vida -= danoRecebido;
+        return `O zumbi te atacou e você recebeu ${danoRecebido} de dano.`;
     }
-  }
-  return eventos;
 }
 
-function tratarEvento(evento) {
-  if (evento.includes("atacado")) {
-    combate();
-  } else {
-    alert(evento);
-    let usarMedicamento = prompt("Você pode usar um medicamento para recuperar vida. Deseja usar? (sim/não)");
-    if (usarMedicamento.toLowerCase() === "sim" && medicamentos > 0) {
-      usarMedicamentoFuncao();
-    }
-    explorarAndar(); // Retornar ao andar após a exploração
-  }
-}
-
-function usarMedicamentoFuncao() {
-  let vidaRecuperada = 30;
-  vida += vidaRecuperada;
-  if (vida > 100) vida = 100; // Limitar vida a 100
-  medicamentos--;
-
-  alert(`Você usou um medicamento e recuperou ${vidaRecuperada} de vida!\nVida atual: ${vida}\nMedicamentos restantes: ${medicamentos}`);
-
-  // Chance de ser atacado após usar o medicamento
-  if (Math.random() < 0.5) {
-    alert("Você foi atacado enquanto usava um medicamento!");
-    combate();
-  }
-}
-
-function combate() {
-  let dano = calcularDano();
-  let acao = prompt("Escolha uma ação:\n1. Atacar\n2. Fugir");
-  
-  if (acao === "1") {
-    if (Math.random() < forca / 100) {
-      alert(`Você atacou os ${inimigo} e os matou sem ferimentos!`);
-      // Não perde nada
+function usarMedicamento() {
+    if (medicamentos > 0) {
+        vida = Math.min(100, vida + 30);
+        medicamentos--;
+        alert("Você usou um medicamento e recuperou 30 de vida.");
     } else {
-      vida -= dano;
-      alert(`Você atacou os ${inimigo}, mas eles te feriram! Vida atual: ${vida}`);
-      if (vida <= 0) {
-        alert("Você foi derrotado! Fim de jogo.");
-        return;
-      }
+        alert("Você não tem mais medicamentos para usar!");
     }
-  } else if (acao === "2") {
-    let medicamentoPerdido = Math.floor(Math.random() * 3) + 1; // Perde entre 1 a 3 medicamentos
-    medicamentos -= medicamentoPerdido;
-    alert(`Você fugiu, mas perdeu ${medicamentoPerdido} medicamentos! Medicamentos atuais: ${medicamentos}`);
-    if (medicamentos < 0) medicamentos = 0; // Garantir que não fique negativo
-  }
-  
-  // Mostrar status atuais
-  alert(`Status atuais:\nVida: ${vida}\nForça: ${forca}\nMedicamentos: ${medicamentos}\nAndar: ${andarAtual}`);
-
-  // Voltar para explorar o andar
-  explorarAndar();
-}
-
-function calcularDano() {
-  let danoBase = 5 + (maxAndares - andarAtual) * 2; // Aumenta o dano base com a proximidade do térreo
-  let danoTotal = danoBase + Math.floor(Math.random() * 5);
-  return danoTotal;
 }
