@@ -5,20 +5,33 @@ class Personagem {
         this.forca = 50; 
         this.recurso = 10; 
         this.andarAtual = 1; 
+        this.totalAndares = 10; // Número de andares para vencer
+        this.eventosPendentes = [];
     }
 
     enfrentarDesafio() {
         const numeroDeEventos = Math.floor(Math.random() * 3) + 2; 
+        this.eventosPendentes = [];
         for (let i = 0; i < numeroDeEventos; i++) {
             const evento = this.sortearEvento();
-            this.mostrarEventoNaTela(evento);
+            this.eventosPendentes.push(evento);
         }
-        this.andarAtual += 1; 
+        this.mostrarProximoEvento();
     }
 
     sortearEvento() {
         const eventos = ['ataque_zumbi', 'sala_silenciosa', 'arma_melhor', 'nada'];
         return eventos[Math.floor(Math.random() * eventos.length)];
+    }
+
+    mostrarProximoEvento() {
+        if (this.eventosPendentes.length > 0) {
+            const evento = this.eventosPendentes.shift(); // Remove o primeiro evento da lista
+            this.mostrarEventoNaTela(evento);
+        } else {
+            this.andarAtual++;
+            this.verificarProgresso();
+        }
     }
 
     mostrarEventoNaTela(evento) {
@@ -78,7 +91,20 @@ class Personagem {
     }
 
     chegouAoTopo() {
-        return this.andarAtual === 10; 
+        return this.andarAtual > this.totalAndares; 
+    }
+
+    verificarProgresso() {
+        if (!this.estaVivo()) {
+            console.log("Você morreu. Fim de jogo.");
+            alert("Você morreu. Fim de jogo.");
+        } else if (this.chegouAoTopo()) {
+            console.log("Você chegou ao topo e foi resgatado pelo helicóptero! Parabéns!");
+            alert("Você venceu o jogo! Chegou ao topo e foi resgatado!");
+        } else {
+            this.statusAtual();
+            this.enfrentarDesafio(); // Começar o próximo andar
+        }
     }
 }
 
@@ -86,37 +112,17 @@ let personagem;
 
 function start() {
     personagem = new Personagem("Sobrevivente");
-    let rodada = 1;
-
-    while (personagem.estaVivo() && !personagem.chegouAoTopo()) {
-        console.log(`\nRodada ${rodada}`);
-        personagem.enfrentarDesafio();
-        rodada++;
-    }
-
-    if (personagem.chegouAoTopo()) {
-        console.log("\nParabéns! Você chegou ao topo do prédio e foi resgatado pelo helicóptero!");
-    } else {
-        console.log("\nO jogo terminou. Você não sobreviveu.");
-    }
+    console.log(`\nIniciando o jogo...`);
+    personagem.statusAtual();
+    personagem.enfrentarDesafio();
 }
 
 function executarAcao(acao) {
     const modal = document.getElementById("modal");
     modal.style.display = "none"; 
 
-    // Ações diferentes podem ser implementadas aqui dependendo da escolha do jogador
     console.log(`Ação escolhida: ${acao}`);
 
-    // Atualiza o status do personagem e continua o jogo
-    personagem.statusAtual();
-
-    // Verifica se o personagem ainda está vivo e continua o jogo
-    if (personagem.estaVivo() && !personagem.chegouAoTopo()) {
-        personagem.enfrentarDesafio();
-    } else if (!personagem.estaVivo()) {
-        console.log("Você morreu.");
-    } else if (personagem.chegouAoTopo()) {
-        console.log("Você chegou ao topo e foi resgatado!");
-    }
+    // Após o jogador escolher uma ação, continua para o próximo evento
+    personagem.mostrarProximoEvento();
 }
