@@ -20,56 +20,55 @@ function explorar() {
     let eventos = [];
 
     // Adiciona eventos aleatórios
-    eventos.push(Math.random() < 0.5 ? "zumbis" : "infectados");
-    if (Math.random() < 0.5) {
-        eventos.push("arma");
+    eventos.push(Math.random() < 0.5 ? "infectados" : "salaSilenciosa"); // 50% de chance de encontrar infectados ou entrar na sala silenciosa
+    if (Math.random() < 0.3) {
+        eventos.push("arma"); // 30% de chance de encontrar arma
     }
 
     for (const evento of eventos) {
-        if (evento === "zumbis") {
-            lutar("zumbis");
-        } else if (evento === "infectados") {
+        if (evento === "infectados") {
             lutar("infectados");
         } else if (evento === "arma") {
             encontrarArma();
+        } else if (evento === "salaSilenciosa") {
+            salaSilenciosa();
         }
     }
 
     // A chance de explorar novamente ou subir de andar
-    let acao = confirm("Deseja continuar explorando a sala (OK) ou avançar para o próximo andar (Cancelar)?");
+    let acao = Math.random() < 0.3; // 30% de chance de subir o andar
     if (acao) {
-        explorar();
-    } else {
         subirAndar();
+    } else {
+        let acaoExplorar = confirm("Deseja continuar explorando a sala (OK) ou avançar para o próximo andar (Cancelar)?");
+        if (acaoExplorar) {
+            explorar();
+        } else {
+            subirAndar();
+        }
     }
 }
 
 // Função para lutar contra os inimigos
 function lutar(tipo) {
-    let inimigos = tipo === "zumbis" ? "zumbis" : "infectados";
-    alert(`Você está sendo atacado por ${inimigos}!`);
+    alert(`Você está sendo atacado por humanos infectados!`);
 
     let acao = confirm("Você deseja atacá-los? (OK para atacar, Cancelar para fugir)");
 
     if (acao) {
         let chanceDeVencer = Math.random() * forca;
         if (chanceDeVencer > 30) {
-            alert(`Você atacou os ${inimigos} e matou todos sem ferimentos!`);
+            alert(`Você atacou os infectados e os derrotou sem perder suprimentos!`);
         } else {
-            vida -= 20; // dano do inimigo
-            alert(`O ${inimigos} te humilha com seus golpes desnecessariamente espetaculares e altamente efetivos! Sua vida agora é ${vida}.`);
-            if (vida <= 0) {
-                alert("Você morreu! Fim de jogo.");
-                return; // Termina o jogo
-            }
-            let continuar = confirm("Deseja continuar a luta (OK) ou fugir (Cancelar)?");
-            if (continuar) {
-                lutar(tipo);
-            } else {
-                medicamentos -= 1; // perder medicamentos ao fugir
-                alert(`Você fugiu, mas perdeu um medicamento! Medicamentos restantes: ${medicamentos}`);
-            }
+            let perdaSuprimentos = Math.floor(Math.random() * 5) + 1; // perda entre 1 e 5 suprimentos
+            medicamentos -= perdaSuprimentos;
+            alert(`Você tentou atacar os infectados, mas falhou e perdeu ${perdaSuprimentos} suprimentos! Medicamentos restantes: ${medicamentos}`);
+            if (medicamentos < 0) medicamentos = 0; // Evitar números negativos
         }
+    } else {
+        let perdaSuprimentos = Math.floor(Math.random() * 3) + 1; // perda menor ao fugir
+        medicamentos -= perdaSuprimentos;
+        alert(`Você tentou fugir e perdeu ${perdaSuprimentos} suprimentos! Medicamentos restantes: ${medicamentos}`);
     }
 
     mostrarStatus();
@@ -90,16 +89,27 @@ function subirAndar() {
         explorar();
     } else {
         alert("Você alcançou o térreo! Parabéns, você sobreviveu!");
+        return; // Termina o jogo
     }
 }
 
 // Função para usar medicamentos
 function usarMedicamentos() {
     if (medicamentos > 0) {
-        vida += 30;
-        if (vida > 100) vida = 100; // Limitar vida máxima a 100
-        medicamentos--;
-        alert(`Você usou um medicamento. Vida: ${vida}, Medicamentos restantes: ${medicamentos}.`);
+        let chanceAtaque = Math.random();
+        if (chanceAtaque < 0.5) { // 50% de chance de ser atacado
+            vida -= 20; // dano do ataque
+            alert(`Você foi atacado enquanto usava os medicamentos! Sua vida caiu para ${vida}.`);
+            if (vida <= 0) {
+                alert("Você morreu! Fim de jogo.");
+                return; // Termina o jogo
+            }
+        } else {
+            vida += 30;
+            if (vida > 100) vida = 100; // Limitar vida máxima a 100
+            medicamentos--;
+            alert(`Você usou um medicamento. Vida: ${vida}, Medicamentos restantes: ${medicamentos}.`);
+        }
     } else {
         alert("Você não tem medicamentos disponíveis!");
     }
@@ -109,16 +119,6 @@ function usarMedicamentos() {
 function salaSilenciosa() {
     alert("Você entrou em uma sala silenciosa. Você pode usar medicamentos aqui.");
     usarMedicamentos();
-
-    if (Math.random() < 0.5) {
-        alert("Você foi atacado enquanto usava os medicamentos!");
-        vida -= 20; // dano do ataque
-        if (vida <= 0) {
-            alert("Você morreu! Fim de jogo.");
-            return; // Termina o jogo
-        }
-    }
-
     mostrarStatus();
 }
 
