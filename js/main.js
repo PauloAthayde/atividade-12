@@ -6,209 +6,121 @@ class Personagem {
         this.medicamentos = 10;
         this.andarAtual = 1;
         this.totalAndares = 10;
-        this.eventosPendentes = [];
-        this.explorandoSala = false;  // Para controlar se o jogador está explorando a sala
+        this.explorandoSala = false; // Flag para controlar se o jogador está explorando a sala
     }
 
-    // Função para enfrentar desafios (eventos aleatórios)
+    // Exibe os status atuais da personagem
+    mostrarStatus() {
+        alert(`Status Atual:
+        Vida: ${this.vida}
+        Força: ${this.forca}
+        Medicamentos: ${this.medicamentos}
+        Andar: ${this.andarAtual}`);
+    }
+
+    // Função para enfrentar um desafio
     enfrentarDesafio() {
-        const numeroDeEventos = Math.floor(Math.random() * 3) + 2;
-        this.eventosPendentes = [];
-        for (let i = 0; i < numeroDeEventos; i++) {
-            const evento = this.sortearEvento();
-            this.eventosPendentes.push(evento);
+        if (this.explorandoSala) {
+            this.explorandoSala = false;
+            this.gerarEventoAleatorio();
+        } else {
+            this.mostrarOpcoes();
         }
-        this.mostrarProximoEvento();
     }
 
-    // Sorteio de eventos aleatórios
-    sortearEvento() {
-        const eventos = ['ataque_zumbis', 'ataque_infectados', 'sala_silenciosa', 'arma_melhor', 'usar_medicamento'];
-        return eventos[Math.floor(Math.random() * eventos.length)];
+    // Função que exibe as opções de ação
+    mostrarOpcoes() {
+        const opcao = prompt("O que você deseja fazer?\n1. Explorar a sala\n2. Avançar para o próximo andar");
+
+        if (opcao == "1") {
+            this.explorarSala();
+        } else if (opcao == "2") {
+            this.avancarAndar();
+        } else {
+            alert("Opção inválida. Tente novamente.");
+            this.mostrarOpcoes();
+        }
     }
 
-    // Exibir o próximo evento
-    mostrarProximoEvento() {
-        if (this.eventosPendentes.length > 0) {
-            const evento = this.eventosPendentes.shift();
-            this.mostrarEventoNaTela(evento);
-        } else if (!this.explorandoSala) {  // Não avança se estiver explorando
+    // Função para explorar a sala
+    explorarSala() {
+        this.explorandoSala = true; // Define que o jogador está explorando a sala
+        alert("Você decidiu explorar a sala...");
+        this.gerarEventoAleatorio();
+    }
+
+    // Função para avançar para o próximo andar
+    avancarAndar() {
+        if (this.andarAtual < this.totalAndares) {
+            this.andarAtual++;
+            alert(`Você avançou para o andar ${this.andarAtual}.`);
+            this.enfrentarDesafio(); // Continuar com o próximo desafio
+        } else {
             this.verificarProgresso();
         }
     }
 
-    // Exibir evento e opções na tela com pop-up
-    mostrarEventoNaTela(evento) {
-        const modal = document.getElementById("modal");
-        const modalMessage = document.getElementById("modal-message");
-        const botao1 = document.getElementById("botao1");
-        const botao2 = document.getElementById("botao2");
+    // Gera um evento aleatório
+    gerarEventoAleatorio() {
+        const eventos = [
+            () => this.ataqueZumbis(),
+            () => this.salaSilenciosa(),
+            () => this.encontrarRecurso(),
+            () => this.encontrarArma()
+        ];
 
-        let mensagem = "";
-        let opcao1 = "";
-        let opcao2 = "";
+        // Seleciona dois eventos aleatórios
+        const evento1 = eventos[Math.floor(Math.random() * eventos.length)];
+        const evento2 = eventos[Math.floor(Math.random() * eventos.length)];
 
-        // Definição dos eventos e suas opções
-        switch (evento) {
-            case 'ataque_zumbis':
-                mensagem = "Você está sendo atacado por zumbis!";
-                opcao1 = "Atacá-los";
-                opcao2 = "Fugir";
-                break;
-
-            case 'ataque_infectados':
-                mensagem = "Infectados estão tentando roubar seus medicamentos!";
-                opcao1 = "Atacá-los";
-                opcao2 = "Fugir";
-                break;
-
-            case 'sala_silenciosa':
-                const ganhoMedicamentos = Math.floor(Math.random() * 5) + 1;
-                this.medicamentos += ganhoMedicamentos;
-                mensagem = `Você encontrou uma sala silenciosa e obteve ${ganhoMedicamentos} medicamentos.`;
-                opcao1 = "Explorar mais a sala";
-                opcao2 = "Avançar para o próximo andar";
-                break;
-
-            case 'arma_melhor':
-                const ganhoForca = Math.floor(Math.random() * 5) + 3;
-                this.forca += ganhoForca;
-                mensagem = `Você encontrou uma espada melhor! Sua força aumentou em ${ganhoForca}.`;
-                opcao1 = "Pegar a espada";
-                opcao2 = "Deixar a espada e avançar para o próximo andar";
-                break;
-
-            case 'usar_medicamento':
-                const vidaRecuperada = Math.min(this.medicamentos * 5, 30);
-                this.vida = Math.min(this.vida + vidaRecuperada, 100);  // Limitar vida a 100
-                this.medicamentos -= Math.ceil(vidaRecuperada / 5);
-                mensagem = `Você usou medicamentos e recuperou ${vidaRecuperada} de vida.`;
-                opcao1 = "Explorar a sala";
-                opcao2 = "Avançar para o próximo andar";
-                break;
-        }
-
-        // Configurar pop-up
-        modalMessage.innerText = mensagem;
-        botao1.innerText = opcao1;
-        botao2.innerText = opcao2;
-        modal.style.display = "flex";
-
-        // Escolha de ação
-        botao1.onclick = () => {
-            modal.style.display = "none";
-            if (opcao1.includes("Explorar")) {
-                this.explorandoSala = true;  // Ativar flag de exploração da sala
-                this.enfrentarDesafio();  // Explorar mais na mesma sala
-            } else {
-                this.realizarAcao(opcao1);
-            }
-        };
-
-        botao2.onclick = () => {
-            modal.style.display = "none";
-            if (opcao2.includes("Avançar")) {
-                this.avancarAndar();  // Avançar somente quando explicitamente escolhido
-            } else {
-                this.realizarAcao(opcao2);
-            }
-        };
+        // Executa os eventos
+        evento1();
+        evento2();
     }
 
-    // Função para realizar as ações escolhidas
-    realizarAcao(acao) {
-        if (acao === "Atacá-los") {
-            this.realizarCombate();
-        } else if (acao === "Fugir") {
-            this.fugir();
-        }
-        this.mostrarStatus();
-    }
+    // Evento: ataque de zumbis
+    ataqueZumbis() {
+        const chanceVitoria = this.forca > Math.floor(Math.random() * 100);
 
-    // Função para avançar de andar
-    avancarAndar() {
-        this.andarAtual++;  // Andar avança apenas aqui
-        this.explorandoSala = false;  // Resetar exploração
-        alert(`Você avançou para o andar ${this.andarAtual}.`);
-        this.enfrentarDesafio();
-    }
-
-    // Realizar combate
-    realizarCombate() {
-        const chanceDeVitoria = Math.random() * 100;
-        const modal = document.getElementById("modal");
-        const modalMessage = document.getElementById("modal-message");
-
-        let mensagem = "";
-
-        if (chanceDeVitoria < this.forca) {
-            mensagem = "Você atacou os zumbis e matou eles sem ferimentos.";
-        } else if (chanceDeVitoria >= this.forca && chanceDeVitoria < this.forca + 30) {
-            const dano = Math.floor(Math.random() * 10) + 1;
-            this.vida -= dano;
-            mensagem = `Você atacou os zumbis e matou todos, mas foi ferido! Perdeu ${dano} de vida.`;
+        if (chanceVitoria) {
+            alert("Você atacou os zumbis e os derrotou sem ferimentos!");
         } else {
-            mensagem = "O zumbi te humilha com golpes espetaculares! Deseja continuar a luta ou fugir?";
-            const botao1 = document.getElementById("botao1");
-            const botao2 = document.getElementById("botao2");
-            botao1.innerText = "Continuar lutando";
-            botao2.innerText = "Fugir";
-            modalMessage.innerText = mensagem;
-            modal.style.display = "flex";
-            botao1.onclick = () => {
-                modal.style.display = "none";
-                this.realizarCombate();
-            };
-            botao2.onclick = () => {
-                modal.style.display = "none";
-                this.fugir();
-            };
-            return;
+            const dano = Math.floor(Math.random() * 20);
+            this.vida -= dano;
+            alert(`Você atacou os zumbis, mas foi ferido e perdeu ${dano} de vida.`);
         }
 
-        modalMessage.innerText = mensagem;
-        modal.style.display = "flex";
-        const botao1 = document.getElementById("botao1");
-        botao1.innerText = "Ok";
-        botao1.onclick = () => modal.style.display = "none";
-        const botao2 = document.getElementById("botao2");
-        botao2.style.display = "none";
-
-        this.mostrarStatus();
+        this.verificarProgresso();
     }
 
-    // Fugir e perder medicamentos
-    fugir() {
-        const perdaMedicamentos = Math.floor(Math.random() * 3) + 1;
-        this.medicamentos -= perdaMedicamentos;
-        const modal = document.getElementById("modal");
-        const modalMessage = document.getElementById("modal-message");
-
-        modalMessage.innerText = `Você fugiu e perdeu ${perdaMedicamentos} medicamentos.`;
-        modal.style.display = "flex";
-
-        const botao1 = document.getElementById("botao1");
-        botao1.innerText = "Ok";
-        botao1.onclick = () => modal.style.display = "none";
-        const botao2 = document.getElementById("botao2");
-        botao2.style.display = "none";
-
-        this.mostrarStatus();
+    // Evento: sala silenciosa
+    salaSilenciosa() {
+        alert("Você encontrou uma sala silenciosa. Nada aconteceu.");
+        this.verificarProgresso();
     }
 
-    // Mostrar status sempre que for alterado
-    mostrarStatus() {
-        const statusMensagem = `Status atual -> Vida: ${this.vida}, Força: ${this.forca}, Medicamentos: ${this.medicamentos}, Andar: ${this.andarAtual}`;
-        console.log(statusMensagem);
-        alert(statusMensagem);
+    // Evento: encontrar recurso (medicamentos)
+    encontrarRecurso() {
+        const quantidade = Math.floor(Math.random() * 5) + 1;
+        this.medicamentos += quantidade;
+        alert(`Você encontrou ${quantidade} medicamentos.`);
+        this.verificarProgresso();
     }
 
-    // Verificar se o personagem está vivo
+    // Evento: encontrar arma (aumenta a força)
+    encontrarArma() {
+        const aumentoForca = Math.floor(Math.random() * 10) + 1;
+        this.forca += aumentoForca;
+        alert(`Você encontrou uma arma e sua força aumentou em ${aumentoForca}.`);
+        this.verificarProgresso();
+    }
+
+    // Verifica se a personagem está viva
     estaVivo() {
         return this.vida > 0;
     }
 
-    // Verificar se chegou ao topo do prédio
+    // Verifica se chegou ao topo
     chegouAoTopo() {
         return this.andarAtual >= this.totalAndares;
     }
@@ -220,7 +132,17 @@ class Personagem {
         } else if (!this.estaVivo()) {
             alert("Você morreu no caminho. Fim de jogo.");
         } else {
-            alert(`Você está no andar ${this.andarAtual}. Continue explorando!`);
+            this.mostrarStatus(); // Exibe os status atuais após cada evento
         }
     }
+}
+
+// Função para iniciar o jogo
+let personagem;
+
+function start() {
+    personagem = new Personagem("Sobrevivente");
+    alert("O jogo começou!");
+    personagem.mostrarStatus(); // Exibe o status inicial
+    personagem.enfrentarDesafio(); // Inicia o primeiro desafio
 }
