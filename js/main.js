@@ -67,20 +67,16 @@ function lutar(tipo) {
                 if (medicamentos < 0) medicamentos = 0; // Não permitir medicamentos negativos
                 alert(`Você falhou em atacar os infectados e perdeu ${suprimentosPerdidos} suprimentos! Medicamentos restantes: ${medicamentos}`);
             } else {
-                vida -= 20; // dano do inimigo
-                alert(`Os ${inimigos} te atacam! Sua vida agora é ${vida}.`);
-                if (vida <= 0) {
-                    alert("Você morreu! Fim de jogo.");
+                // Aqui, os zumbis devem remover medicamentos, não vida
+                let suprimentosPerdidos = Math.floor(Math.random() * 3) + 1; // Perde de 1 a 3 suprimentos
+                medicamentos -= suprimentosPerdidos;
+                if (medicamentos < 0) medicamentos = 0; // Não permitir medicamentos negativos
+                alert(`Você falhou em atacar os zumbis e perdeu ${suprimentosPerdidos} suprimentos! Medicamentos restantes: ${medicamentos}`);
+
+                // Verifica se ainda tem medicamentos para não morrer
+                if (medicamentos === 0) {
+                    alert("Você não tem mais medicamentos e ficou vulnerável aos ataques dos zumbis! Fim de jogo.");
                     return; // Termina o jogo
-                }
-                let continuar = confirm("Deseja continuar a luta (OK) ou fugir (Cancelar)?");
-                if (continuar) {
-                    lutar(tipo);
-                } else {
-                    let suprimentosPerdidos = Math.floor(Math.random() * 2) + 1; // Perde 1 ou 2 suprimentos ao fugir
-                    medicamentos -= suprimentosPerdidos;
-                    if (medicamentos < 0) medicamentos = 0; // Não permitir medicamentos negativos
-                    alert(`Você fugiu, mas perdeu ${suprimentosPerdidos} suprimentos! Medicamentos restantes: ${medicamentos}`);
                 }
             }
         }
@@ -196,4 +192,5 @@ function portaMisteriosa() {
     }
 }
 
-// Não chamar start() automaticamente
+// Não iniciar automaticamente, chamaremos a função no console
+// start(); // Removido para evitar iniciar o jogo automaticamente
