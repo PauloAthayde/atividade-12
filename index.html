@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jogo de Rodadas</title>
     <style>
-        /* Estilo para a janela modal */
         #modal {
             display: none;
             position: fixed;
@@ -38,13 +37,12 @@
     <h1>Bem-vindo ao Jogo de Rodadas!</h1>
     <p>Abra o console do navegador e digite <code>start()</code> para iniciar o jogo.</p>
 
-    <!-- Janela modal para exibir os eventos e ações -->
     <div id="modal">
         <div id="modal-content">
             <p id="modal-message">Mensagem do evento vai aparecer aqui.</p>
             <div id="modal-buttons">
-                <button class="modal-button" onclick="executarAcao('opcao1')">Ação 1</button>
-                <button class="modal-button" onclick="executarAcao('opcao2')">Ação 2</button>
+                <button class="modal-button" id="botao1" onclick="executarAcao('opcao1')">Ação 1</button>
+                <button class="modal-button" id="botao2" onclick="executarAcao('opcao2')">Ação 2</button>
             </div>
         </div>
     </div>
