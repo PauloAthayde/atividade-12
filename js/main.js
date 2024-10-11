@@ -145,4 +145,3 @@ function executarAcao(acao) {
     // Após o jogador escolher uma ação, continua para o próximo evento
     personagem.mostrarProximoEvento();
 }
-git 
