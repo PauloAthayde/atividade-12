@@ -7,7 +7,7 @@ class Personagem {
         this.andarAtual = 1;
         this.totalAndares = 10;
         this.eventosPendentes = [];
-        this.explorandoSala = false; // Adiciona um controle para saber se está explorando a sala
+        this.explorandoSala = false; // Controle para explorar a sala
     }
 
     enfrentarDesafio() {
@@ -29,11 +29,10 @@ class Personagem {
         if (this.eventosPendentes.length > 0) {
             const evento = this.eventosPendentes.shift();
             this.mostrarEventoNaTela(evento);
-        } else if (!this.explorandoSala) { // Só avança se não estiver explorando a sala
-            this.andarAtual++;
-            this.verificarProgresso();
         } else {
-            this.explorandoSala = false; // Reseta a flag de explorar sala
+            this.andarAtual++;
+            this.explorandoSala = false; // Reseta o estado de exploração após esgotar eventos
+            this.verificarProgresso();
         }
     }
 
@@ -61,7 +60,7 @@ class Personagem {
                 break;
 
             case 'sala_silenciosa':
-                const ganhoMedicamentos = Math.floor(Math.random() * 5) + 1; 
+                const ganhoMedicamentos = Math.floor(Math.random() * 5) + 1;
                 this.medicamentos += ganhoMedicamentos;
                 mensagem = `Você encontrou uma sala silenciosa e obteve ${ganhoMedicamentos} medicamentos.`;
                 opcao1 = "Explorar mais a sala";
@@ -69,7 +68,7 @@ class Personagem {
                 break;
 
             case 'arma_melhor':
-                const ganhoForca = Math.floor(Math.random() * 5) + 3; 
+                const ganhoForca = Math.floor(Math.random() * 5) + 3;
                 this.forca += ganhoForca;
                 mensagem = `Você encontrou uma espada melhor! Sua força aumentou em ${ganhoForca}.`;
                 opcao1 = "Pegar a espada";
@@ -91,13 +90,14 @@ class Personagem {
         botao2.innerText = opcao2;
         modal.style.display = "flex";
 
-        // Atualiza a flag de explorando sala ao clicar em "Explorar mais a sala"
         botao1.onclick = () => {
             modal.style.display = "none";
             if (opcao1.includes("Explorar")) {
                 this.explorandoSala = true;
+                this.enfrentarDesafio(); // Continua os eventos na mesma sala
+            } else {
+                this.mostrarProximoEvento();
             }
-            this.mostrarProximoEvento();
         };
 
         botao2.onclick = () => {
@@ -108,15 +108,10 @@ class Personagem {
 
     realizarCombate() {
         const chanceDeVitoria = Math.random() * 100;
-        const chanceDePerdaMedicamentos = Math.floor(Math.random() * 5) + 2;
         const modal = document.getElementById("modal");
         const modalMessage = document.getElementById("modal-message");
-        const botao1 = document.getElementById("botao1");
-        const botao2 = document.getElementById("botao2");
 
         let mensagem = "";
-        let opcao1 = "";
-        let opcao2 = "";
 
         if (chanceDeVitoria < this.forca) {
             mensagem = "Você atacou os zumbis e matou eles sem ferimentos.";
@@ -125,9 +120,13 @@ class Personagem {
             this.vida -= dano;
             mensagem = `Você atacou os zumbis e matou todos, mas foi ferido! Perdeu ${dano} de vida.`;
         } else {
-            mensagem = "O zumbi te humilha com seus golpes desnecessariamente espetaculares e altamente efetivos! Deseja continuar a luta ou fugir?";
-            opcao1 = "Continuar lutando";
-            opcao2 = "Fugir";
+            mensagem = "O zumbi te humilha com golpes espetaculares! Deseja continuar a luta ou fugir?";
+            const botao1 = document.getElementById("botao1");
+            const botao2 = document.getElementById("botao2");
+            botao1.innerText = "Continuar lutando";
+            botao2.innerText = "Fugir";
+            modalMessage.innerText = mensagem;
+            modal.style.display = "flex";
             botao1.onclick = () => {
                 modal.style.display = "none";
                 this.realizarCombate();
@@ -136,17 +135,15 @@ class Personagem {
                 modal.style.display = "none";
                 this.fugir();
             };
-            modalMessage.innerText = mensagem;
-            botao1.innerText = opcao1;
-            botao2.innerText = opcao2;
-            modal.style.display = "flex";
             return;
         }
 
         modalMessage.innerText = mensagem;
         modal.style.display = "flex";
+        const botao1 = document.getElementById("botao1");
         botao1.innerText = "Ok";
         botao1.onclick = () => modal.style.display = "none";
+        const botao2 = document.getElementById("botao2");
         botao2.style.display = "none";
     }
 
@@ -192,7 +189,7 @@ class Personagem {
     }
 }
 
-let personagem; 
+let personagem;
 
 function start() {
     personagem = new Personagem("Sobrevivente");
@@ -210,8 +207,6 @@ function executarAcao(acao) {
     } else if (acao === "Fugir") {
         personagem.fugir();
     }
-
-    console.log(`Ação escolhida: ${acao}`);
 
     personagem.mostrarProximoEvento();
 }
