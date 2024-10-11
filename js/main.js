@@ -1,13 +1,13 @@
 class Personagem {
     constructor(nome) {
         this.nome = nome;
-        this.vida = 100;  // Vida inicial limitada a 100
+        this.vida = 100;
         this.forca = 50;
         this.medicamentos = 10;
         this.andarAtual = 1;
         this.totalAndares = 10;
         this.eventosPendentes = [];
-        this.explorandoSala = false;
+        this.explorandoSala = false;  // Para controlar se o jogador está explorando a sala
     }
 
     // Função para enfrentar desafios (eventos aleatórios)
@@ -32,8 +32,7 @@ class Personagem {
         if (this.eventosPendentes.length > 0) {
             const evento = this.eventosPendentes.shift();
             this.mostrarEventoNaTela(evento);
-        } else {
-            this.explorandoSala = false;  // Corrigido: não avança para o próximo andar ao explorar sala
+        } else if (!this.explorandoSala) {  // Não avança se estiver explorando
             this.verificarProgresso();
         }
     }
@@ -99,17 +98,39 @@ class Personagem {
         botao1.onclick = () => {
             modal.style.display = "none";
             if (opcao1.includes("Explorar")) {
-                this.explorandoSala = true;
+                this.explorandoSala = true;  // Ativar flag de exploração da sala
                 this.enfrentarDesafio();  // Explorar mais na mesma sala
             } else {
-                this.mostrarProximoEvento();
+                this.realizarAcao(opcao1);
             }
         };
 
         botao2.onclick = () => {
             modal.style.display = "none";
-            this.mostrarProximoEvento();
+            if (opcao2.includes("Avançar")) {
+                this.avancarAndar();  // Avançar somente quando explicitamente escolhido
+            } else {
+                this.realizarAcao(opcao2);
+            }
         };
+    }
+
+    // Função para realizar as ações escolhidas
+    realizarAcao(acao) {
+        if (acao === "Atacá-los") {
+            this.realizarCombate();
+        } else if (acao === "Fugir") {
+            this.fugir();
+        }
+        this.mostrarStatus();
+    }
+
+    // Função para avançar de andar
+    avancarAndar() {
+        this.andarAtual++;  // Andar avança apenas aqui
+        this.explorandoSala = false;  // Resetar exploração
+        alert(`Você avançou para o andar ${this.andarAtual}.`);
+        this.enfrentarDesafio();
     }
 
     // Realizar combate
@@ -189,14 +210,17 @@ class Personagem {
 
     // Verificar se chegou ao topo do prédio
     chegouAoTopo() {
-        return this.andarAtual > this.totalAndares;
+        return this.andarAtual >= this.totalAndares;
     }
 
-    // Verificar progresso no jogo
+    // Função para verificar progresso no jogo
     verificarProgresso() {
-        if (!this.estaVivo()) {
-            console.log("Você morreu. Fim de jogo.");
-            alert("Você morreu. Fim de jogo.");
-        } else if (this.chegouAoTopo()) {
-            console.log("Você chegou ao topo e foi resgatado pelo helicóptero! Parabéns!");
-            alert("Você venceu o jogo!
+        if (this.chegouAoTopo()) {
+            alert("Você chegou ao topo do prédio e foi resgatado!");
+        } else if (!this.estaVivo()) {
+            alert("Você morreu no caminho. Fim de jogo.");
+        } else {
+            alert(`Você está no andar ${this.andarAtual}. Continue explorando!`);
+        }
+    }
+}
