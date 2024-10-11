@@ -7,6 +7,7 @@ class Personagem {
         this.andarAtual = 1;
         this.totalAndares = 10;
         this.eventosPendentes = [];
+        this.explorandoSala = false; // Adiciona um controle para saber se está explorando a sala
     }
 
     enfrentarDesafio() {
@@ -28,9 +29,11 @@ class Personagem {
         if (this.eventosPendentes.length > 0) {
             const evento = this.eventosPendentes.shift();
             this.mostrarEventoNaTela(evento);
-        } else {
+        } else if (!this.explorandoSala) { // Só avança se não estiver explorando a sala
             this.andarAtual++;
             this.verificarProgresso();
+        } else {
+            this.explorandoSala = false; // Reseta a flag de explorar sala
         }
     }
 
@@ -87,24 +90,80 @@ class Personagem {
         botao1.innerText = opcao1;
         botao2.innerText = opcao2;
         modal.style.display = "flex";
+
+        // Atualiza a flag de explorando sala ao clicar em "Explorar mais a sala"
+        botao1.onclick = () => {
+            modal.style.display = "none";
+            if (opcao1.includes("Explorar")) {
+                this.explorandoSala = true;
+            }
+            this.mostrarProximoEvento();
+        };
+
+        botao2.onclick = () => {
+            modal.style.display = "none";
+            this.mostrarProximoEvento();
+        };
     }
 
     realizarCombate() {
         const chanceDeVitoria = Math.random() * 100;
         const chanceDePerdaMedicamentos = Math.floor(Math.random() * 5) + 2;
+        const modal = document.getElementById("modal");
+        const modalMessage = document.getElementById("modal-message");
+        const botao1 = document.getElementById("botao1");
+        const botao2 = document.getElementById("botao2");
+
+        let mensagem = "";
+        let opcao1 = "";
+        let opcao2 = "";
 
         if (chanceDeVitoria < this.forca) {
-            console.log("Você venceu o combate! Não perdeu nada.");
+            mensagem = "Você atacou os zumbis e matou eles sem ferimentos.";
+        } else if (chanceDeVitoria >= this.forca && chanceDeVitoria < this.forca + 30) {
+            const dano = Math.floor(Math.random() * 10) + 1;
+            this.vida -= dano;
+            mensagem = `Você atacou os zumbis e matou todos, mas foi ferido! Perdeu ${dano} de vida.`;
         } else {
-            this.medicamentos -= chanceDePerdaMedicamentos;
-            console.log(`Você perdeu a batalha e perdeu ${chanceDePerdaMedicamentos} medicamentos.`);
+            mensagem = "O zumbi te humilha com seus golpes desnecessariamente espetaculares e altamente efetivos! Deseja continuar a luta ou fugir?";
+            opcao1 = "Continuar lutando";
+            opcao2 = "Fugir";
+            botao1.onclick = () => {
+                modal.style.display = "none";
+                this.realizarCombate();
+            };
+            botao2.onclick = () => {
+                modal.style.display = "none";
+                this.fugir();
+            };
+            modalMessage.innerText = mensagem;
+            botao1.innerText = opcao1;
+            botao2.innerText = opcao2;
+            modal.style.display = "flex";
+            return;
         }
+
+        modalMessage.innerText = mensagem;
+        modal.style.display = "flex";
+        botao1.innerText = "Ok";
+        botao1.onclick = () => modal.style.display = "none";
+        botao2.style.display = "none";
     }
 
     fugir() {
         const perdaMedicamentos = Math.floor(Math.random() * 3) + 1;
         this.medicamentos -= perdaMedicamentos;
-        console.log(`Você fugiu e perdeu ${perdaMedicamentos} medicamentos.`);
+        const modal = document.getElementById("modal");
+        const modalMessage = document.getElementById("modal-message");
+
+        modalMessage.innerText = `Você fugiu e perdeu ${perdaMedicamentos} medicamentos.`;
+        modal.style.display = "flex";
+
+        const botao1 = document.getElementById("botao1");
+        botao1.innerText = "Ok";
+        botao1.onclick = () => modal.style.display = "none";
+        const botao2 = document.getElementById("botao2");
+        botao2.style.display = "none";
     }
 
     statusAtual() {
