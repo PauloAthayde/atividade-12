@@ -109,8 +109,14 @@ class Personagem {
     // Evento: encontrar recurso (medicamentos)
     encontrarRecurso() {
         const quantidade = Math.floor(Math.random() * 5) + 1;
-        this.medicamentos += quantidade;
-        alert(`Você encontrou ${quantidade} medicamentos.`);
+
+        // Verifica se encontrou algum recurso
+        if (quantidade > 0) {
+            this.medicamentos += quantidade;
+            alert(`Você encontrou ${quantidade} medicamentos.`);
+        } else {
+            alert("Você não encontrou nenhum medicamento.");
+        }
         this.verificarProgresso();
     }
 
