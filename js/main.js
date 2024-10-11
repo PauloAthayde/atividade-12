@@ -77,7 +77,7 @@ class Personagem {
 
             case 'usar_medicamento':
                 const vidaRecuperada = Math.min(this.medicamentos * 5, 30);
-                this.vida += vidaRecuperada;
+                this.vida = Math.min(this.vida + vidaRecuperada, 100); // Limita a vida máxima a 100
                 this.medicamentos -= Math.ceil(vidaRecuperada / 5);
                 mensagem = `Você usou medicamentos e recuperou ${vidaRecuperada} de vida.`;
                 opcao1 = "Explorar a sala";
@@ -145,6 +145,8 @@ class Personagem {
         botao1.onclick = () => modal.style.display = "none";
         const botao2 = document.getElementById("botao2");
         botao2.style.display = "none";
+
+        this.mostrarStatus();
     }
 
     fugir() {
@@ -161,10 +163,14 @@ class Personagem {
         botao1.onclick = () => modal.style.display = "none";
         const botao2 = document.getElementById("botao2");
         botao2.style.display = "none";
+
+        this.mostrarStatus();
     }
 
-    statusAtual() {
-        console.log(`Status atual -> Vida: ${this.vida}, Força: ${this.forca}, Medicamentos: ${this.medicamentos}, Andar: ${this.andarAtual}`);
+    mostrarStatus() {
+        const statusMensagem = `Status atual -> Vida: ${this.vida}, Força: ${this.forca}, Medicamentos: ${this.medicamentos}, Andar: ${this.andarAtual}`;
+        console.log(statusMensagem);
+        alert(statusMensagem);
     }
 
     estaVivo() {
@@ -183,7 +189,7 @@ class Personagem {
             console.log("Você chegou ao topo e foi resgatado pelo helicóptero! Parabéns!");
             alert("Você venceu o jogo! Chegou ao topo e foi resgatado!");
         } else {
-            this.statusAtual();
+            this.mostrarStatus();
             this.enfrentarDesafio();
         }
     }
@@ -194,7 +200,7 @@ let personagem;
 function start() {
     personagem = new Personagem("Sobrevivente");
     console.log(`\nIniciando o jogo...`);
-    personagem.statusAtual();
+    personagem.mostrarStatus();
     personagem.enfrentarDesafio();
 }
 
