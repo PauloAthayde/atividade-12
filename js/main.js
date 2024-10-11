@@ -2,10 +2,10 @@ class Personagem {
     constructor(nome) {
         this.nome = nome;
         this.vida = 100;
-        this.forca = 50; 
-        this.medicamentos = 10; 
-        this.andarAtual = 1; 
-        this.totalAndares = 10; 
+        this.forca = 50;
+        this.medicamentos = 10;
+        this.andarAtual = 1;
+        this.totalAndares = 10;
         this.eventosPendentes = [];
     }
 
@@ -20,7 +20,7 @@ class Personagem {
     }
 
     sortearEvento() {
-        const eventos = ['ataque_zumbi', 'sala_silenciosa', 'arma_melhor', 'perda_medicamentos', 'sala_armadilha'];
+        const eventos = ['ataque_zumbi', 'sala_silenciosa', 'arma_melhor', 'perda_medicamentos', 'sala_armadilha', 'usar_medicamento'];
         return eventos[Math.floor(Math.random() * eventos.length)];
     }
 
@@ -54,9 +54,9 @@ class Personagem {
                 break;
 
             case 'sala_silenciosa':
-                const ganhoMedicamentos = Math.floor(Math.random() * 5); 
+                const ganhoMedicamentos = Math.floor(Math.random() * 5);
                 this.medicamentos += ganhoMedicamentos;
-                mensagem = `Você encontrou uma sala silenciosa e obteve ${ganhoMedicamentos} de medicamentos, mas há armadilhas no caminho.`;
+                mensagem = `Você encontrou uma sala silenciosa e obteve ${ganhoMedicamentos} medicamentos, mas há armadilhas no caminho.`;
                 opcao1 = "Explorar e arriscar vida";
                 opcao2 = "Sair imediatamente";
                 break;
@@ -72,7 +72,7 @@ class Personagem {
             case 'perda_medicamentos':
                 const perdaMedicamentos = Math.floor(Math.random() * 8) + 2; 
                 this.medicamentos -= perdaMedicamentos;
-                mensagem = `Você se deparou com saqueadores e perdeu ${perdaMedicamentos} de medicamentos.`;
+                mensagem = `Você foi roubado e perdeu ${perdaMedicamentos} medicamentos.`;
                 opcao1 = "Enfrentá-los";
                 opcao2 = "Fugir e perder ainda mais medicamentos";
                 break;
@@ -84,6 +84,15 @@ class Personagem {
                 opcao1 = "Tentar desarmar a armadilha";
                 opcao2 = "Ignorar e continuar";
                 break;
+
+            case 'usar_medicamento':
+                const vidaRecuperada = Math.min(this.medicamentos * 5, 30); // Recupera até 30 de vida
+                this.vida += vidaRecuperada;
+                this.medicamentos -= Math.ceil(vidaRecuperada / 5);
+                mensagem = `Você usou medicamentos e recuperou ${vidaRecuperada} de vida.`;
+                opcao1 = "Continuar";
+                opcao2 = "Explorar mais";
+                break;
         }
 
         modalMessage.innerText = mensagem;
@@ -93,7 +102,7 @@ class Personagem {
     }
 
     statusAtual() {
-        console.log(`Status atual -> Vida: ${this.vida}, Força: ${this.forca}, Medicamentos: ${this.medicamentos}`);
+        console.log(`Status atual -> Vida: ${this.vida}, Força: ${this.forca}, Medicamentos: ${this.medicamentos}, Andar: ${this.andarAtual}`);
     }
 
     estaVivo() {
@@ -136,3 +145,4 @@ function executarAcao(acao) {
     // Após o jogador escolher uma ação, continua para o próximo evento
     personagem.mostrarProximoEvento();
 }
+git 
