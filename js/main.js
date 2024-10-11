@@ -1,12 +1,21 @@
 let vida = 100;
 let forca = 50;
-let medicamentos = 5; // Inicia com 5 medicamentos
+let medicamentos = 5; // Começa com 5 medicamentos
 let andarAtual = 1;
 const maxMedicamentos = 10;
 
 // Função para atualizar e mostrar status
 function mostrarStatus() {
     alert(`Status Atual:\nVida: ${vida}\nForça: ${forca}\nMedicamentos: ${medicamentos}\nAndar Atual: ${andarAtual}`);
+}
+
+// Função para verificar morte
+function verificarMorte() {
+    if (vida <= 0) {
+        alert("Você morreu! Fim de jogo.");
+        return true; // Indica que o jogo terminou
+    }
+    return false; // Indica que o jogo continua
 }
 
 // Função para iniciar o jogo
@@ -21,10 +30,10 @@ function explorar() {
 
     // Adiciona eventos aleatórios
     eventos.push(Math.random() < 0.5 ? "zumbis" : "infectados");
-    if (Math.random() < 0.5) {
+    if (Math.random() < 0.3) { // 30% de chance de encontrar uma arma
         eventos.push("arma");
     }
-    if (Math.random() < 0.2) { // 20% chance de porta misteriosa
+    if (Math.random() < 0.1) { // 10% de chance de encontrar uma porta misteriosa
         eventos.push("porta misteriosa");
     }
 
@@ -40,12 +49,17 @@ function explorar() {
         }
     }
 
-    // Chance de explorar novamente ou subir de andar
+    // A chance de explorar novamente ou subir de andar
     let acao = confirm("Deseja continuar explorando a sala (OK) ou avançar para o próximo andar (Cancelar)?");
     if (acao) {
         explorar();
     } else {
-        subirAndar();
+        if (Math.random() < 0.2) { // 20% de chance de subir de andar
+            subirAndar();
+        } else {
+            alert("Você decidiu continuar explorando.");
+            explorar();
+        }
     }
 }
 
@@ -62,31 +76,36 @@ function lutar(tipo) {
             alert(`Você atacou os ${inimigos} e matou todos sem ferimentos!`);
         } else {
             if (tipo === "infectados") {
-                let suprimentosPerdidos = Math.floor(Math.random() * 3) + 1; // Perde de 1 a 3 suprimentos
-                medicamentos -= suprimentosPerdidos;
-                if (medicamentos < 0) medicamentos = 0; // Não permitir medicamentos negativos
-                alert(`Você falhou em atacar os infectados e perdeu ${suprimentosPerdidos} suprimentos! Medicamentos restantes: ${medicamentos}`);
+                alert(`Você falhou ao atacar os infectados! Eles tentaram roubar seus medicamentos.`);
+                if (medicamentos > 0) {
+                    let perdaMedicamentos = Math.floor(Math.random() * 3) + 1; // Perda de 1 a 3 medicamentos
+                    medicamentos = Math.max(medicamentos - perdaMedicamentos, 0);
+                    alert(`Você perdeu ${perdaMedicamentos} medicamentos. Medicamentos restantes: ${medicamentos}`);
+                } else {
+                    vida -= 10; // Dano quando não há medicamentos
+                    alert(`Você não tinha medicamentos para proteger, perdeu 10 de vida! Sua vida agora é ${vida}.`);
+                    if (verificarMorte()) return; // Verifica a morte após a luta
+                }
             } else {
-                // Aqui, os zumbis devem remover medicamentos, não vida
-                let suprimentosPerdidos = Math.floor(Math.random() * 3) + 1; // Perde de 1 a 3 suprimentos
-                medicamentos -= suprimentosPerdidos;
-                if (medicamentos < 0) medicamentos = 0; // Não permitir medicamentos negativos
-                alert(`Você falhou em atacar os zumbis e perdeu ${suprimentosPerdidos} suprimentos! Medicamentos restantes: ${medicamentos}`);
-
-                // Verifica se ainda tem medicamentos para não morrer
-                if (medicamentos === 0) {
-                    alert("Você não tem mais medicamentos e ficou vulnerável aos ataques dos zumbis! Fim de jogo.");
-                    return; // Termina o jogo
+                vida -= 20; // Dano dos zumbis
+                alert(`Os ${inimigos} te atacaram! Sua vida agora é ${vida}.`);
+                if (verificarMorte()) return; // Verifica a morte após a luta
+                let continuar = confirm("Deseja continuar a luta (OK) ou fugir (Cancelar)?");
+                if (continuar) {
+                    lutar(tipo);
+                } else {
+                    let fugaSucesso = Math.random() < 0.5; // 50% de chance de fuga
+                    if (fugaSucesso) {
+                        let perdaMedicamentos = Math.floor(Math.random() * 2) + 1; // Perda de 1 a 2 medicamentos
+                        medicamentos = Math.max(medicamentos - perdaMedicamentos, 0);
+                        alert(`Você conseguiu fugir, mas perdeu ${perdaMedicamentos} medicamentos. Medicamentos restantes: ${medicamentos}`);
+                    } else {
+                        vida -= 10; // Dano na fuga
+                        alert(`Você falhou em fugir! Perdeu 10 de vida. Sua vida agora é ${vida}.`);
+                        verificarMorte();
+                    }
                 }
             }
-        }
-    } else {
-        let danoVida = Math.floor(Math.random() * 10) + 1; // Perde de 1 a 10 de vida ao fugir
-        vida -= danoVida;
-        alert(`Você tentou fugir, mas os ${inimigos} te atacaram! Você perdeu ${danoVida} de vida. Sua vida agora é ${vida}.`);
-        if (vida <= 0) {
-            alert("Você morreu! Fim de jogo.");
-            return; // Termina o jogo
         }
     }
 
@@ -100,29 +119,19 @@ function encontrarArma() {
     alert(`Você encontrou uma arma melhor! Sua força aumentou em ${incrementoForca}. Nova força: ${forca}`);
 }
 
-// Função para subir de andar
-function subirAndar() {
-    if (andarAtual < 10 && Math.random() < 0.2) { // 20% de chance
-        andarAtual++;
-        alert(`Você subiu para o andar ${andarAtual}.`);
-        explorar();
-    } else {
-        alert("Você não subiu de andar desta vez.");
-        explorar();
-    }
-}
-
 // Função para usar medicamentos
 function usarMedicamentos() {
     if (medicamentos > 0) {
         let usar = confirm("Deseja usar um medicamento? (OK para sim, Cancelar para não)");
         if (usar) {
-            vida += 30;
-            if (vida > 100) vida = 100; // Limitar vida máxima a 100
-            medicamentos--;
-            alert(`Você usou um medicamento. Vida: ${vida}, Medicamentos restantes: ${medicamentos}.`);
-        } else {
-            alert("Você decidiu não usar um medicamento.");
+            if (vida < 100) {
+                vida += 30;
+                if (vida > 100) vida = 100; // Limitar vida máxima a 100
+                medicamentos--;
+                alert(`Você usou um medicamento. Vida: ${vida}, Medicamentos restantes: ${medicamentos}.`);
+            } else {
+                alert("Você já está com a vida cheia!");
+            }
         }
     } else {
         alert("Você não tem medicamentos disponíveis!");
@@ -136,11 +145,8 @@ function salaSilenciosa() {
 
     if (Math.random() < 0.5) {
         alert("Você foi atacado enquanto usava os medicamentos!");
-        vida -= 20; // dano do ataque
-        if (vida <= 0) {
-            alert("Você morreu! Fim de jogo.");
-            return; // Termina o jogo
-        }
+        vida -= 20; // Dano do ataque
+        if (verificarMorte()) return; // Verifica a morte
     }
 
     mostrarStatus();
@@ -148,49 +154,45 @@ function salaSilenciosa() {
 
 // Função para a porta misteriosa
 function portaMisteriosa() {
-    alert("Você encontrou uma porta misteriosa. Deseja abri-la?");
-    let entrar = confirm("OK para abrir a porta, Cancelar para ignorar.");
-
+    let entrar = confirm("Você encontrou uma porta misteriosa. Deseja abrir a porta e entrar? (OK para sim, Cancelar para não)");
     if (entrar) {
-        let chanceMedicamentos = Math.floor(Math.random() * 3) + 1; // De 1 a 3 medicamentos
-        if (Math.random() < 0.5) {
-            medicamentos += chanceMedicamentos;
-            if (medicamentos > maxMedicamentos) medicamentos = maxMedicamentos; // Limitar a 10 medicamentos
-            alert(`Você encontrou ${chanceMedicamentos} medicamentos! Medicamentos totais: ${medicamentos}`);
+        let evento = Math.floor(Math.random() * 3); // 0, 1 ou 2 medicamentos
+        if (evento === 0) {
+            let medicamentosEncontrados = Math.floor(Math.random() * 3) + 1; // 1 a 3 medicamentos
+            medicamentos = Math.min(medicamentos + medicamentosEncontrados, maxMedicamentos);
+            alert(`Você encontrou ${medicamentosEncontrados} medicamentos! Medicamentos totais: ${medicamentos}`);
         } else {
-            alert("Você pisou em falso num corpo de um zumbi que mordeu sua perna!");
-            let dano = 15;
-            vida -= dano;
-            alert(`Você perdeu ${dano} de vida! Sua vida agora é ${vida}.`);
+            alert("Você pisou em um corpo de zumbi que mordeu sua perna!");
+            vida -= 15; // Dano da mordida
+            alert(`Você perdeu 15 de vida. Sua vida agora é ${vida}.`);
+            if (verificarMorte()) return; // Verifica a morte
 
-            if (vida <= 0) {
-                alert("Você morreu! Fim de jogo.");
-                return; // Termina o jogo
-            }
-
-            let acaoZumbi = confirm("O zumbi prendeu os dentes na sua perna! Deseja pisar na cabeça dele (OK) ou se soltar a força (Cancelar)?");
+            let acaoZumbi = confirm("Quer pisar na cabeça dele (OK) ou tentar se soltar a força (Cancelar)?");
             if (acaoZumbi) {
-                // Pisar na cabeça do zumbi
-                let chanceDeMorte = Math.random() * forca;
-                if (chanceDeMorte > 20) {
+                let chanceDeMatar = Math.random() * forca;
+                if (chanceDeMatar > 25) {
                     alert("Você pisou na cabeça do zumbi e o matou!");
-                    let continuar = confirm("Deseja continuar nessa sala da porta misteriosa (OK) ou sair imediatamente (Cancelar)?");
-                    if (continuar) {
-                        let chanceMedicamentos = Math.floor(Math.random() * 3) + 1; // De 1 a 3 medicamentos
-                        medicamentos += chanceMedicamentos;
-                        if (medicamentos > maxMedicamentos) medicamentos = maxMedicamentos; // Limitar a 10 medicamentos
-                        alert(`Você encontrou ${chanceMedicamentos} medicamentos! Medicamentos totais: ${medicamentos}`);
-                    }
                 } else {
-                    alert("O zumbi é forte! Você não conseguiu matá-lo a tempo e perdeu a vida.");
-                    vida -= 20; // dano do zumbi
+                    vida -= 15; // Dano da mordida
+                    alert(`Você falhou! O zumbi mordeu sua outra perna! Você perdeu mais 15 de vida. Sua vida agora é ${vida}.`);
+                    if (verificarMorte()) return; // Verifica a morte
                 }
+            } else {
+                vida -= 5; // Dano ao tentar se soltar
+                alert(`Você se soltou a força, mas perdeu 5 de vida ao machucar sua perna! Sua vida agora é ${vida}.`);
+                if (verificarMorte()) return; // Verifica a morte
             }
         }
     } else {
-        alert("Você ignorou a porta misteriosa e continuou explorando.");
+        alert("Você decidiu não entrar e continua sua aventura.");
     }
 }
 
-// Não iniciar automaticamente, chamaremos a função no console
-// start(); // Removido para evitar iniciar o jogo automaticamente
+// Função para subir de andar
+function subirAndar() {
+    andarAtual++;
+    alert(`Você subiu para o andar ${andarAtual}.`);
+    explorar();
+}
+
+// Iniciar o jogo com o comando start()
