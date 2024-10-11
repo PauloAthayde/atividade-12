@@ -196,5 +196,4 @@ function portaMisteriosa() {
     }
 }
 
-// Início do jogo
-start();
+// Não chamar start() automaticamente
