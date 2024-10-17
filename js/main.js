@@ -23,7 +23,7 @@ function explorar() {
     if (Math.random() < 0.5) {
         eventos.push("infectados");
     }
-    if (Math.random() < 0.3) {
+    if (Math.random() < 0.1) { // Alterado de 0.3 para 0.1
         eventos.push("arma");
     }
     if (Math.random() < 0.2) {
